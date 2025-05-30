@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Anniversary</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: radial-gradient(#fff0f5, #ffdde1);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    .message {
+      position: absolute;
+      top: 70%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 3em;
+      color: #e91e63;
+      z-index: 3;
+      display: none;
+      animation: fadeIn 3s ease-in-out forwards;
+      text-align: center;
+    }
+
+    #backgroundImage {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.1)), url('https://images.unsplash.com/photo-1519125323398-675f0ddb6308') center/cover no-repeat;
+      opacity: 0;
+      z-index: 0;
+      animation: dissolveIn 5s ease-in-out forwards;
+      animation-delay: 1.2s;
+      pointer-events: none;
+    }
+
+    #centerImage {
+      position: absolute;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      opacity: 0;
+      z-index: 3;
+      animation: dissolveIn 3s ease-in-out forwards;
+      animation-delay: 1.2s;
+      display: none;
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      background: white;
+    }
+
+    #centerImage:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    #bgMusic {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -60%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+
+    @keyframes dissolveIn {
+      0% { opacity: 0; filter: blur(10px); }
+      100% { opacity: 1; filter: blur(0); }
+    }
+
+    .hearts {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+    }
+
+    .heart {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: pink;
+      transform: rotate(45deg);
+      animation: float 10s linear infinite;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background-color: pink;
+      border-radius: 50%;
+    }
+
+    .heart::before {
+      top: -10px;
+      left: 0;
+    }
+
+    .heart::after {
+      left: -10px;
+      top: 0;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) scale(1) rotate(45deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-10vh) scale(1.5) rotate(45deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="backgroundImage"></div>
+  <canvas id="canvas"></canvas>
+  <img src="image.jpeg" alt="Anniversary" id="centerImage">
+  <div class="message" id="annivMessage">💖 Happy Anniversary, Vinod & Padma 💖</div>
+  <div class="hearts" id="heartsContainer"></div>
+  <audio id="bgMusic" loop>
+    <source src="https://www.bensound.com/bensound-music/bensound-love.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const message = document.getElementById('annivMessage');
+    const heartsContainer = document.getElementById('heartsContainer');
+    const bgMusic = document.getElementById('bgMusic');
+    const backgroundImage = document.getElementById('backgroundImage');
+    const centerImage = document.getElementById('centerImage');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const balloons = [];
+    const confetti = [];
+    const colors = ['#e91e63', '#ff9800', '#4caf50', '#2196f3', '#9c27b0', '#ffc107'];
+    let particlesFormingText = false;
+
+    class Balloon {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.radius = 30;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.ellipse(this.x, this.y, 24, this.radius, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y + this.radius);
+        ctx.lineTo(this.x, this.y + this.radius + 30);
+        ctx.strokeStyle = '#555';
+        ctx.stroke();
+      }
+    }
+
+    class Particle {
+      constructor(x, y, color, vx, vy) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.vx = vx;
+        this.vy = vy;
+        this.alpha = 1;
+      }
+
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.alpha -= 0.01;
+      }
+
+      draw() {
+        ctx.globalAlpha = this.alpha;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    function createBalloons() {
+      for (let i = 0; i < 15; i++) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height / 2 + canvas.height / 2;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        balloons.push(new Balloon(x, y, color));
+      }
+    }
+
+    function explodeBalloon(balloon) {
+      for (let i = 0; i < 50; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 5;
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        confetti.push(new Particle(balloon.x, balloon.y, color, vx, vy));
+      }
+    }
+
+    function popAllBalloons() {
+      balloons.forEach(balloon => explodeBalloon(balloon));
+      balloons.length = 0;
+      setTimeout(() => {
+        showMessage();
+        particlesFormingText = true;
+        backgroundImage.style.zIndex = '2';
+        backgroundImage.style.opacity = '1';
+        centerImage.style.display = 'block';
+        bgMusic.play();
+      }, 1200);
+    }
+
+    function showMessage() {
+      message.style.display = 'block';
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      balloons.forEach(balloon => balloon.draw());
+
+      for (let i = confetti.length - 1; i >= 0; i--) {
+        const p = confetti[i];
+        p.update();
+        p.draw();
+        if (p.alpha <= 0) confetti.splice(i, 1);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function createHearts() {
+      for (let i = 0; i < 30; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart';
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDuration = `${5 + Math.random() * 5}s`;
+        heart.style.opacity = Math.random();
+        heartsContainer.appendChild(heart);
+      }
+    }
+
+    canvas.addEventListener('click', () => {
+      if (balloons.length > 0) popAllBalloons();
+    });
+
+    createHearts();
+    createBalloons();
+    animate();
+  </script>
+</body>
+</html>
+
