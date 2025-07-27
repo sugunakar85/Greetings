@@ -1,20 +1,27 @@
-const navToggle = document.querySelector('.nav-toggle');
-const sidebar = document.querySelector('.sidebar');
-navToggle.addEventListener('click', () => {
-  sidebar.classList.toggle('active');
-});
+document.addEventListener("DOMContentLoaded", () => {
+  const toggles = document.querySelectorAll(".accordion-toggle");
 
-// Accordion functionality
-const accToggles = document.querySelectorAll('.accordion-toggle');
-accToggles.forEach(toggle => {
-  toggle.addEventListener('click', () => {
-    const content = toggle.nextElementSibling;
-    toggle.classList.toggle('active');
-    if (content.style.maxHeight) {
-      content.style.maxHeight = null;
-    } else {
-      content.style.maxHeight = content.scrollHeight + 'px';
-    }
+  toggles.forEach(toggle => {
+    toggle.addEventListener("click", () => {
+      const content = toggle.nextElementSibling;
+      const isOpen = toggle.classList.contains("active");
+
+      // Close all open sections
+      document.querySelectorAll(".accordion-toggle.active").forEach(activeToggle => {
+        activeToggle.classList.remove("active");
+        const activeContent = activeToggle.nextElementSibling;
+        activeContent.style.maxHeight = null;
+        activeContent.classList.remove("open");
+      });
+
+      // Open current one
+      if (!isOpen) {
+        toggle.classList.add("active");
+        content.classList.add("open");
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    });
   });
 });
+
 
