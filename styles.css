@@ -83,6 +83,42 @@ footer {
   content: '▼';
   transform: rotate(180deg);
 }
+/* Active Accordion Header with RGB Glitter Effect */
+.accordion-toggle.active {
+  background: linear-gradient(
+    270deg,
+    #ff0000,
+    #ff7300,
+    #fffb00,
+    #48ff00,
+    #00ffd5,
+    #002bff,
+    #7a00ff,
+    #ff00ab,
+    #ff0000
+  );
+  background-size: 600% 600%;
+  color: #fff;
+  animation: glitterRGB 15s ease infinite;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.6),
+              0 0 25px rgba(255, 0, 150, 0.7),
+              0 0 35px rgba(0, 200, 255, 0.7);
+  position: relative;
+  overflow: hidden;
+}
+
+/* RGB gradient animation */
+@keyframes glitterRGB {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Sparkle animation */
+@keyframes sparkle {
+  from { transform: ease-in(0deg) translate(0,0); }
+  to { transform: ease-out(0deg) translate(10px,10px); }
+}
 
 /* Accordion Content Styling */
 .accordion-content {
@@ -121,5 +157,6 @@ footer {
     font-size: 0.95rem;
   }
 }
+
 
 
