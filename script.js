@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   });
-
+    document.getElementById("year").textContent = new Date().getFullYear();
   // Close open accordion when Tab key is pressed
   document.addEventListener("keydown", (e) => {
     if (e.key === "Tab") {
